@@ -1,0 +1,49 @@
+[build-system]
+requires = ["hatchling>=1.25"]
+build-backend = "hatchling.build"
+
+[project]
+name = "lunarlander-rl"
+version = "0.1.0"
+description = "LunarLander solved with every RL method: DQN variants, REINFORCE, A2C, PPO, discrete SAC and DDPG/TD3/SAC on the continuous version, in one PyTorch code base compared on the same environment."
+readme = "README.md"
+license = { text = "MIT" }
+authors = [{ name = "Ismail Ben Alla" }]
+requires-python = ">=3.10"
+keywords = [
+  "reinforcement-learning", "lunar-lander", "gymnasium", "box2d", "dqn", "double-dqn", "dueling-dqn",
+  "prioritized-replay", "reinforce", "a2c", "ppo", "sac", "td3", "ddpg", "pytorch", "educational",
+]
+dependencies = [
+  "numpy>=1.24",
+  "torch>=2.2",
+  "gymnasium[box2d]>=1.0",
+  "matplotlib>=3.7",
+  "pillow>=9",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "nbformat>=5.10"]
+
+[project.scripts]
+lunarlander-train = "lunarlander_rl.train:main"
+lunarlander-play = "lunarlander_rl.play:main"
+lunarlander-eval = "lunarlander_rl.evaluate:main"
+lunarlander-compare = "lunarlander_rl.compare:main"
+
+# uv picks the small CPU-only torch wheels; plain pip ignores this section.
+[tool.uv.sources]
+torch = { index = "pytorch-cpu" }
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/lunarlander_rl"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+filterwarnings = ["ignore::DeprecationWarning"]
