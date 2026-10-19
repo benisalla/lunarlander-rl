@@ -69,7 +69,7 @@ class Config:
     noise_clip: float = 0.5
     alpha: float = 0.2             # SAC entropy temperature (initial value when auto_alpha)
     auto_alpha: bool = True
-    target_entropy_scale: float = 0.5  # discrete SAC: target entropy = scale * log(n_actions)
+    target_entropy_scale: float = 0.2  # discrete SAC: target entropy = scale * log(n_actions)
 
     def to_dict(self) -> dict:
         d = dataclasses.asdict(self)
@@ -125,12 +125,12 @@ METHODS: dict[str, Preset] = {
     ),
     "reinforce": Preset(
         "reinforce", False, "Monte-Carlo policy gradient with a learned value baseline",
-        {**_PG, "lr": 1e-3, "episodes_per_update": 4, "total_steps": 300_000},
+        {**_PG, "lr": 1e-3, "episodes_per_update": 4, "total_steps": 1_000_000},
     ),
     "a2c": Preset(
         "a2c", False, "synchronous advantage actor-critic, short rollouts, one step per rollout",
         {**_PG, "lr": 7e-4, "n_envs": 8, "n_steps": 16, "gae_lambda": 0.95, "gamma": 0.99,
-         "ent_coef": 0.01, "total_steps": 300_000},
+         "ent_coef": 0.01, "total_steps": 1_000_000},
     ),
     "ppo": Preset(
         "ppo", False, "clipped surrogate objective, GAE, several epochs per rollout",
@@ -139,7 +139,8 @@ METHODS: dict[str, Preset] = {
     "sac-discrete": Preset(
         "sac_discrete", False, "soft actor-critic with a categorical policy (exact expectation over actions)",
         {"hidden": (128, 128), "lr": 3e-4, "batch_size": 128, "buffer_size": 100_000, "learning_starts": 5_000,
-         "train_freq": 2, "tau": 0.005, "total_steps": 100_000},
+         "train_freq": 2, "tau": 0.005, "target_entropy_scale": 0.2,
+         "total_steps": 100_000},
     ),
     "ddpg": Preset("ddpg", True, "deterministic actor + Q critic, Gaussian exploration noise", _CONT),
     "td3": Preset("td3", True, "DDPG + twin critics, delayed actor, target policy smoothing", _CONT),

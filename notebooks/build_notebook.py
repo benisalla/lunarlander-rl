@@ -96,8 +96,8 @@ actions: `[main, lateral]` in [-1, 1]; the main engine fires (50-100% power) whe
 engine when |lateral| > 0.5. An episode ends on a crash / landing (`terminated`) or after 1000
 steps (`truncated`). **Solved = mean return >= 200.**
 
-Two reference policies give the scale: random actions (about -170) and the PID controller that
-ships with gymnasium (about +260).
+Two reference policies give the scale: random actions (about -140) and the PID controller that
+ships with gymnasium (about +266).
 """)
 code("""
 env = make_env(continuous=False)

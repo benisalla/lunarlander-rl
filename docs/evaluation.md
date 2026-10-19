@@ -35,8 +35,8 @@ runs/<method>/
 
 ```bash
 lunarlander-eval runs/ppo --episodes 100       # re-evaluate a saved agent
-lunarlander-eval --baseline heuristic          # gymnasium's PID controller (~260)
-lunarlander-eval --baseline random             # random actions (~-170)
+lunarlander-eval --baseline heuristic          # gymnasium's PID controller (~266 discrete, ~288 continuous)
+lunarlander-eval --baseline random             # random actions (~-143)
 lunarlander-compare runs --out assets          # results.md + curves_*.png
 lunarlander-play runs/ppo --gif assets/ppo.gif # one landing as a GIF
 ```

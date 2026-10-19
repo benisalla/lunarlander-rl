@@ -57,7 +57,7 @@ Why it matters in plain words:
 * **Leg contact +10 each** rewards touching the pad; losing contact costs it back, which
   discourages bouncing.
 * **Solved = mean return >= 200** over evaluation episodes. A good landing scores 200-300; the
-  heuristic controller that ships with gymnasium gets about 260 (see the README baselines).
+  heuristic controller that ships with gymnasium gets about 266 (discrete) and 288 (continuous) (see the README baselines).
 
 ## Episode end: terminated vs truncated
 

@@ -119,7 +119,11 @@ were collected by pi_old: after a few steps the policy has changed and the plain
 policy-gradient estimate is no longer valid. The ratio corrects for that (importance
 sampling), and the clip removes the incentive to move the ratio outside [0.8, 1.2], a cheap
 trust region. Watch `clip_frac` and `approx_kl` in `metrics.json`: if they grow large the
-learning rate or the number of epochs is too high. The same code runs the continuous env with a
+learning rate or the number of epochs is too high; if they stay near 0 the policy is not
+moving at all. That is what happened here before the actor's and the critic's gradients were
+clipped **separately** (`OnPolicyAgent.clip_actor_critic`): early value losses are in the
+thousands, so a single shared norm clip of 0.5 spent the whole budget on the critic and PPO
+ran with `clip_frac = 0` and `approx_kl ~ 2e-4`. The same code runs the continuous env with a
 diagonal Gaussian policy whose log std is a learned parameter (`ppo-continuous`).
 
 ## DDPG  ([ddpg.py](../src/lunarlander_rl/algorithms/ddpg.py))
@@ -170,11 +174,13 @@ reparameterisation):
 ```
 V'(s') = sum_a' pi(a'|s') [min Q'_i(s', a') - alpha log pi(a'|s')]
 actor:  loss = sum_a pi(a|s) [alpha log pi(a|s) - min Q_i(s, a)]
-alpha:  loss = log alpha (H[pi(.|s)] - target_entropy),  target_entropy = 0.5 log 4
+alpha:  loss = log alpha (H[pi(.|s)] - target_entropy),  target_entropy = 0.2 log 4
 ```
 
 The critics have one output per action, like DQN. The target entropy is the delicate knob: the
-paper's 0.98 log |A| keeps the policy almost uniform; a smaller fraction lets it commit.
+paper's 0.98 log |A| keeps the policy almost uniform; a smaller fraction lets it commit. Here
+0.5 log 4 still kept alpha around 0.7 (large next to per-step rewards of about 1) and the greedy
+policy swung wildly between evaluations, so the preset uses 0.2 log 4.
 
 ## Networks
 

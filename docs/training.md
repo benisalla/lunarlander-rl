@@ -22,10 +22,10 @@ agent, summary = train(make_config("dueling-dqn", total_steps=100_000), "runs/du
 |---|---|---|---|
 | `dqn`, `double-dqn` | 150k | 128x128, lr 6.3e-4, batch 128, buffer 50k, 2 gradient steps every 4 env steps, target copy every 250 updates, epsilon 1 -> 0.05 over 12% | the tuned rl-baselines3-zoo LunarLander setting, with half the gradient steps to fit one CPU thread |
 | `dueling-dqn` | 150k | as DQN + double + dueling + PER (alpha 0.6, beta 0.4 -> 1) + 3-step | all the Rainbow-style additions that apply without distributional RL or noisy nets |
-| `reinforce` | 300k | 64x64 tanh, lr 1e-3, 4 episodes per update, gamma 0.999 | gamma close to 1: a landing pays off hundreds of steps later |
-| `a2c` | 300k | 8 envs x 16 steps, GAE 0.95, lr 7e-4, entropy 0.01 | short rollouts = many small updates |
+| `reinforce` | 1M | 64x64 tanh, lr 1e-3, 4 episodes per update, gamma 0.999 | gamma close to 1: a landing pays off hundreds of steps later |
+| `a2c` | 1M | 8 envs x 16 steps, GAE 0.95, lr 7e-4, entropy 0.01 | short rollouts = many small updates |
 | `ppo` | 1M | 16 envs x 1024 steps, 4 epochs, minibatch 64, GAE 0.98, gamma 0.999, clip 0.2, entropy 0.01 | zoo setting; PPO needs many env steps but they are cheap |
-| `sac-discrete` | 100k | 128x128, lr 3e-4, batch 128, 1 update every 2 steps, target entropy 0.5 log 4 | |
+| `sac-discrete` | 100k | 128x128, lr 3e-4, batch 128, 1 update every 2 steps, target entropy 0.2 log 4 | with 0.5 log 4 alpha stayed at ~0.7 and the greedy policy swung between +177 and -580 from one evaluation to the next; a lower target lets the policy commit |
 | `ddpg`, `td3`, `sac` | 120k | 128x128, lr 1e-3 (SAC 7.3e-4, tau 0.01), batch 128, 5k random warm-up steps, 1 update every 2 steps | SAC/TD3 normally use 256x256 and one update per step; halved for one CPU thread |
 | `ppo-continuous` | 1M | as `ppo`, Gaussian policy with learned log std | |
 

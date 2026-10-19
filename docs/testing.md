@@ -1,7 +1,7 @@
 # Tests
 
 ```bash
-OMP_NUM_THREADS=1 pytest -q          # 47 tests, about 1 minute on one CPU
+OMP_NUM_THREADS=1 pytest -q          # 48 tests, about 30 s on one idle CPU thread (up to ~1.5 min on a busy machine)
 ```
 
 | file | what it checks |
@@ -11,7 +11,7 @@ OMP_NUM_THREADS=1 pytest -q          # 47 tests, about 1 minute on one CPU
 | `test_networks.py` | output shapes of every network; dueling mean-advantage identity; the tanh-Gaussian log-prob equals torch's `TanhTransform` density; Polyak update |
 | `test_returns.py` | reward-to-go; GAE with lambda = 1 equals Monte-Carlo returns and lambda = 0 equals the one-step TD error, across an episode boundary |
 | `test_algorithms.py` | for all 11 methods: act in the right action format, save/load gives identical actions; replay methods: an update changes the weights with a finite loss; **learning check**: 9 methods (DQN, dueling DQN + PER + n-step, REINFORCE, A2C, PPO, discrete SAC, TD3, SAC, continuous PPO) learn a contextual bandit with LunarLander's shapes far above chance in a few thousand steps |
-| `test_end_to_end.py` | the real LunarLander: env shapes, the heuristic beats random, a 600-step training run saves / reloads / evaluates and `compare` writes the table and figures, a GIF is written |
+| `test_end_to_end.py` | the real LunarLander: env shapes, the heuristic beats random, a 600-step training run saves / reloads / evaluates and `compare` writes the table and figures, a GIF is written; the tracker evaluates once (not on every step) when a vector rollout runs past the budget |
 
 ## Why a contextual bandit for the learning check
 
