@@ -39,7 +39,24 @@ lunarlander-eval --baseline heuristic          # gymnasium's PID controller (~26
 lunarlander-eval --baseline random             # random actions (~-143)
 lunarlander-compare runs --out assets          # results.md + curves_*.png
 lunarlander-play runs/ppo --gif assets/ppo.gif # one landing as a GIF
+python scripts/make_gifs.py                    # README before/after + solved-grid GIFs
 ```
+
+## Before / after GIFs
+
+`scripts/make_gifs.py` builds the README's visual comparison from the saved checkpoints:
+
+* `assets/before_after_ppo.gif` and `assets/before_after_ppo-continuous.gif`: the same episode
+  seed played by an untrained network of the same method (fresh random weights, left) and by
+  the trained checkpoint (right), with each episode's return in the caption.
+* `assets/solved_grid.gif`: one panel per method whose run reached a greedy evaluation of 200 or
+  more and kept a final 20-episode score of at least 150, all on the same seed.
+
+Short episodes freeze on their last frame until the longest one ends. Every third frame is kept,
+downscaled to half size and reduced to 64 colours, so each file stays under 1 MB (`--every`,
+`--scale` and `--seed` change that). The helpers are `play.before_after` and
+`play.save_panels_gif`. If a checkpoint is missing, the script trains it first with the
+method's preset; that takes minutes, so on a shared machine run it under the lock.
 
 ## Table columns
 

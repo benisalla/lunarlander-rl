@@ -12,7 +12,32 @@ notebook that explains each update rule next to its code.**
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](pyproject.toml)
 [![PyTorch](https://img.shields.io/badge/PyTorch-2.x-ee4c2c.svg)](https://pytorch.org)
 [![Gymnasium](https://img.shields.io/badge/gymnasium-LunarLander--v3-0081a5.svg)](https://gymnasium.farama.org/environments/box2d/lunar_lander/)
-[![Tests](https://img.shields.io/badge/tests-48%20passing-brightgreen.svg)](docs/testing.md)
+[![Tests](https://img.shields.io/badge/tests-49%20passing-brightgreen.svg)](docs/testing.md)
+
+## Before and after training
+
+Same episode seed, same network architecture: on the left the network before training (random
+weights), on the right the checkpoint from the local CPU run in [Results](#results-short-cpu-runs-not-benchmarks).
+The caption above each panel shows that episode's return (200 or more counts as solved).
+
+**PPO, discrete lander** (4 engine buttons)
+
+![PPO before and after training](assets/before_after_ppo.gif)
+
+**PPO, continuous lander** (2 throttles). This seed's landing scores 173, below the 200 bar:
+the run's 20-episode mean is 262.5 +- 35.9, so some episodes land less cleanly.
+
+![continuous PPO before and after training](assets/before_after_ppo-continuous.gif)
+
+**Every method that solved it locally.** One panel per method that reached a greedy evaluation
+of 200 or more and kept a final 20-episode score of at least 150 (A2C reached 200 but then fell
+to -145, so it is left out). All panels play the same episode seed, and the caption is that
+episode's return.
+
+![methods that solved LunarLander](assets/solved_grid.gif)
+
+Regenerate these GIFs from the saved checkpoints with `python scripts/make_gifs.py`; a missing
+checkpoint is trained first with its preset.
 
 The point is to understand how each method works by running it: every algorithm is 60-120
 lines with its update rule written as equations in the docstring, the networks are small MLPs
@@ -159,11 +184,12 @@ src/lunarlander_rl/
   play.py          episodes and GIFs                                            (lunarlander-play)
   compare.py       results table + curves from runs/*/metrics.json              (lunarlander-compare)
   viz.py           plots
-tests/             48 pytest tests (about 30 s): buffers, GAE, log-probs, every agent learns a bandit
+tests/             49 pytest tests (about 30 s): buffers, GAE, log-probs, every agent learns a bandit
 examples/          01-06 runnable scripts (see examples/README.md)
 docs/              architecture.md, environment.md, training.md, evaluation.md, testing.md, data.md
 notebooks/         build_notebook.py -> train_colab_kaggle.ipynb
-scripts/           run_all.py: train several methods in one process
+scripts/           run_all.py (train several methods), make_assets.py (table, curves),
+                   make_gifs.py (before/after and solved-grid GIFs)
 assets/            figures, GIFs and results.md from the local runs
 ```
 

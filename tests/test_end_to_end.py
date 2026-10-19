@@ -7,7 +7,7 @@ import numpy as np
 from lunarlander_rl import evaluate, load_agent, make_config, make_env, train
 from lunarlander_rl.compare import load_runs, main as compare_main, results_table
 from lunarlander_rl.evaluate import BASELINES
-from lunarlander_rl.play import record_episode, save_gif
+from lunarlander_rl.play import record_episode, save_gif, save_panels_gif
 
 
 def test_env_shapes():
@@ -53,3 +53,13 @@ def test_tracker_evaluates_once_past_the_budget():
     for _ in range(30):  # a vector env keeps stepping past the budget until its rollout ends
         tr.add_steps(8)
     assert [e[0] for e in tr.evals] == [40, 80, 104] and len(calls) == 3
+
+
+def test_panels_gif(tmp_path):
+    from PIL import Image
+
+    a, _ = record_episode(None, False, policy=BASELINES["heuristic"], max_steps=12)
+    b, _ = record_episode(None, False, policy=BASELINES["random"], max_steps=6)
+    path = save_panels_gif([(a, "left"), (b, "right")], tmp_path / "p.gif", every=2, scale=0.25, hold=2)
+    im = Image.open(path)
+    assert im.size == (2 * 150, 100 + 22) and im.n_frames >= 7  # identical hold frames may be merged

@@ -72,3 +72,61 @@ def main(argv=None) -> None:
         outcome = "landed" if ret >= 200 else ("crashed" if term and ret < 0 else "")
         print(f"episode {ep}: return {ret:7.1f} in {t} steps {outcome}")
     env.close()
+
+
+# ---- composite GIFs: before / after and a grid of agents --------------------------------------
+
+def _panel(frame, caption: str, scale: float):
+    """One frame, downscaled, with a caption bar above it."""
+    from PIL import Image, ImageDraw
+
+    img = Image.fromarray(np.asarray(frame))
+    img = img.resize((int(img.width * scale), int(img.height * scale)))
+    bar = 22
+    out = Image.new("RGB", (img.width, img.height + bar), (20, 20, 20))
+    out.paste(img, (0, bar))
+    ImageDraw.Draw(out).text((6, 5), caption, fill=(255, 255, 255))
+    return out
+
+
+def save_panels_gif(episodes, path, ncols: int | None = None, every: int = 3, scale: float = 0.4,
+                    fps: int = 25, hold: int = 15) -> Path:
+    """Tile several recorded episodes into one animated GIF.
+
+    ``episodes`` is a list of (frames, caption). Shorter episodes freeze on their last frame
+    until the longest one ends; every ``every``-th frame is kept and downscaled by ``scale``
+    so the file stays small (a few MB at most).
+    """
+    from PIL import Image
+
+    ncols = ncols or len(episodes)
+    nrows = -(-len(episodes) // ncols)
+    length = max(len(f) for f, _ in episodes)
+    first = _panel(episodes[0][0][0], "", scale)
+    w, h = first.size
+    out = []
+    for t in list(range(0, length, every)) + [length - 1] * hold:
+        canvas = Image.new("RGB", (ncols * w, nrows * h), (20, 20, 20))
+        for k, (frames, caption) in enumerate(episodes):
+            canvas.paste(_panel(frames[min(t, len(frames) - 1)], caption, scale), ((k % ncols) * w, (k // ncols) * h))
+        out.append(canvas.convert("P", palette=Image.ADAPTIVE, colors=64))
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    out[0].save(path, save_all=True, append_images=out[1:], duration=int(1000 / fps), loop=0, optimize=True)
+    return path
+
+
+def before_after(run_dir, path, seed: int = 3, **kw) -> tuple[Path, float, float]:
+    """Same episode seed, untrained network (left) vs the trained checkpoint (right)."""
+    from .algorithms import build_agent
+    from .envs import set_seed
+    from .train import load_agent
+
+    trained, cfg = load_agent(run_dir)
+    set_seed(cfg.seed)
+    untrained = build_agent(cfg)  # same architecture, fresh random weights
+    f0, r0 = record_episode(untrained, cfg.continuous, seed=seed)
+    f1, r1 = record_episode(trained, cfg.continuous, seed=seed)
+    p = save_panels_gif([(f0, f"{cfg.method}: before training, return {r0:.0f}"),
+                         (f1, f"{cfg.method}: after training, return {r1:.0f}")], path, **kw)
+    return p, r0, r1
